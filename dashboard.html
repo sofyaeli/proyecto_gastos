@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mi Panel de Gastos</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .dashboard-container {
+        margin-top: 30px;
+      }
+      .card {
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: none;
+      }
+      #graficoContainer {
+        max-width: 300px;
+        margin: auto;
+      }
+      .bg-primary-grad {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-primary mb-4">
+      <div class="container">
+        <span class="navbar-brand mb-0 h1" id="saludoUsuario">Cargando...</span>
+        <button class="btn btn-outline-light btn-sm" onclick="cerrarSesion()">
+          Cerrar Sesión
+        </button>
+      </div>
+    </nav>
+
+    <div class="container dashboard-container">
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card bg-primary-grad text-white text-center p-4 shadow">
+            <div class="row align-items-center">
+              <div class="col-md-6 text-md-start">
+                <h5 class="opacity-75">Total Gastado</h5>
+                <h1 class="display-3 fw-bold" id="totalMesGrande">$0.00</h1>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">📅 Filtrar por Mes:</label>
+                <select
+                  id="filtroMes"
+                  class="form-select form-select-lg shadow-sm"
+                  onchange="cargarGrafico()"
+                >
+                  <option value="todos">Todos los meses</option>
+                  <option value="01">Enero</option>
+                  <option value="02">Febrero</option>
+                  <option value="03">Marzo</option>
+                  <option value="04">Abril</option>
+                  <option value="05">Mayo</option>
+                  <option value="06">Junio</option>
+                  <option value="07">Julio</option>
+                  <option value="08">Agosto</option>
+                  <option value="09">Septiembre</option>
+                  <option value="10">Octubre</option>
+                  <option value="11">Noviembre</option>
+                  <option value="12">Diciembre</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mt-3 p-3 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="text-muted mb-0">Progreso del Presupuesto</h6>
+              <span class="badge bg-dark" id="textoPresupuesto"
+                >Límite: $0</span
+              >
+            </div>
+            <div class="progress" style="height: 25px; border-radius: 12px">
+              <div
+                id="barraProgreso"
+                class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                style="width: 0%"
+              >
+                0%
+              </div>
+            </div>
+            <div class="mt-3 d-flex gap-2">
+              <input
+                type="number"
+                id="nuevoLimite"
+                class="form-control form-control-sm"
+                placeholder="Definir meta (ej: 500)"
+              />
+              <button class="btn btn-primary btn-sm" onclick="actualizarMeta()">
+                Fijar Meta
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-5 mb-4">
+          <div class="card p-4 shadow-sm h-100">
+            <h4 class="mb-3 text-primary">Registrar Gasto</h4>
+            <div class="mb-3">
+              <label class="form-label">Monto ($)</label>
+              <input
+                type="number"
+                id="monto"
+                class="form-control form-control-lg"
+                placeholder="0.00"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Categoría</label>
+              <select id="categoria" class="form-select">
+                <option value="Alimentación">Alimentación 🍎</option>
+                <option value="Transporte">Transporte 🚗</option>
+                <option value="Salud">Salud 🩺</option>
+                <option value="Ocio">Ocio 🎬</option>
+                <option value="Hormiga">Gasto Hormiga 🐜</option>
+              </select>
+            </div>
+            <button
+              class="btn btn-primary w-100 btn-lg"
+              onclick="enviarGasto()"
+            >
+              Guardar Gasto
+            </button>
+            <div
+              id="feedback"
+              class="mt-3 p-2 text-center rounded"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+
+        <div class="col-md-7 mb-4">
+          <div class="card p-4 shadow-sm text-center h-100">
+            <h4 class="mb-3 text-primary">Resumen Visual</h4>
+            <div id="graficoContainer">
+              <canvas id="miGrafico"></canvas>
+            </div>
+            <div id="consejoIA" class="alert alert-info mt-3 small">
+              Analizando tus finanzas...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2 mb-5">
+        <div class="col-12">
+          <div class="accordion" id="accordionHistorial">
+            <div class="accordion-item shadow-sm">
+              <h2 class="accordion-header">
+                <button
+                  class="accordion-button collapsed fw-bold"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseHistorial"
+                >
+                  📂 Ver Historial Detallado
+                </button>
+              </h2>
+              <div
+                id="collapseHistorial"
+                class="accordion-collapse collapse"
+                data-bs-parent="#accordionHistorial"
+              >
+                <div class="accordion-body">
+                  <table class="table table-hover">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Categoría</th>
+                        <th>Monto</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaGastos"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      const usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
+      if (!usuario) {
+        window.location.href = "login.html";
+      }
+      document.getElementById("saludoUsuario").innerText =
+        `Hola, ${usuario.nombre} 👋`;
+
+      let miChart;
+
+      async function cargarGrafico() {
+        try {
+          const url = `https://5025a3f7-5414-4235-a6d0-4e79ffff0d49-00-3bh2luvxxb3yg.worf.replit.dev/obtener_gastos/${usuario.id}`;
+          const res = await fetch(url);
+          const gastos = await res.json();
+
+          const filtroMes = document.getElementById("filtroMes").value;
+          const tabla = document.getElementById("tablaGastos");
+          const totalGrande = document.getElementById("totalMesGrande");
+          const consejoDiv = document.getElementById("consejoIA");
+
+          tabla.innerHTML = "";
+          let sumaTotal = 0;
+          let sumaHormiga = 0;
+          const totalesPorCategoria = {};
+
+          gastos.forEach((g) => {
+            const fechaGasto = new Date(g.fecha);
+            const mesGasto = (fechaGasto.getMonth() + 1)
+              .toString()
+              .padStart(2, "0");
+
+            if (filtroMes === "todos" || mesGasto === filtroMes) {
+              const monto = parseFloat(g.monto);
+              sumaTotal += monto;
+              if (g.categoria === "Hormiga") sumaHormiga += monto;
+
+              totalesPorCategoria[g.categoria] =
+                (totalesPorCategoria[g.categoria] || 0) + monto;
+
+              tabla.innerHTML += `
+                <tr>
+                  <td>${fechaGasto.toLocaleDateString()}</td>
+                  <td>${g.categoria}</td>
+                  <td class="fw-bold">$${monto.toFixed(2)}</td>
+                </tr>`;
+            }
+          });
+
+          totalGrande.innerText = `$${sumaTotal.toFixed(2)}`;
+          actualizarBarraPresupuesto(sumaTotal);
+
+          // Lógica del Gráfico
+          const ctx = document.getElementById("miGrafico").getContext("2d");
+          if (miChart) {
+            miChart.destroy();
+          }
+
+          if (Object.keys(totalesPorCategoria).length > 0) {
+            miChart = new Chart(ctx, {
+              type: "doughnut",
+              data: {
+                labels: Object.keys(totalesPorCategoria),
+                datasets: [
+                  {
+                    data: Object.values(totalesPorCategoria),
+                    backgroundColor: [
+                      "#4e73df",
+                      "#1cc88a",
+                      "#36b9cc",
+                      "#f6c23e",
+                      "#e74a3b",
+                    ],
+                  },
+                ],
+              },
+              options: { maintainAspectRatio: false },
+            });
+          }
+
+          // IA Feedback
+          if (sumaHormiga > sumaTotal * 0.15 && sumaTotal > 0) {
+            consejoDiv.className = "alert alert-warning mt-3 small";
+            consejoDiv.innerHTML = `🐜 <strong>Gasto Hormiga:</strong> Representan $${sumaHormiga.toFixed(2)}. ¡Evita compras impulsivas!`;
+          } else {
+            consejoDiv.className = "alert alert-info mt-3 small";
+            consejoDiv.innerHTML = "✅ Tus finanzas están bajo control.";
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      async function enviarGasto() {
+        const monto = document.getElementById("monto").value;
+        const categoria = document.getElementById("categoria").value;
+        if (!monto || monto <= 0) return alert("Ingresa un monto");
+
+        const res = await fetch(
+          "https://5025a3f7-5414-4235-a6d0-4e79ffff0d49-00-3bh2luvxxb3yg.worf.replit.dev/agregar",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              monto: parseFloat(monto),
+              categoria: categoria,
+              usuario_id: usuario.id,
+              fecha: new Date().toISOString(),
+            }),
+          },
+        );
+
+        const data = await res.json();
+        const f = document.getElementById("feedback");
+        f.style.display = "block";
+        f.innerText = data.feedback;
+        f.className = "mt-3 p-2 text-center rounded alert alert-success";
+
+        document.getElementById("monto").value = "";
+        cargarGrafico();
+      }
+
+      function actualizarBarraPresupuesto(sumaTotal) {
+        const limite =
+          parseFloat(localStorage.getItem("presupuestoMensual")) || 0;
+        const barra = document.getElementById("barraProgreso");
+        const texto = document.getElementById("textoPresupuesto");
+
+        if (limite > 0) {
+          const porcentaje = (sumaTotal / limite) * 100;
+          const porcentajeVisual = Math.min(porcentaje, 100);
+          barra.style.width = porcentajeVisual + "%";
+          barra.innerText = Math.round(porcentaje) + "%";
+          texto.innerText = `Límite: $${limite.toFixed(2)}`;
+
+          barra.className =
+            "progress-bar progress-bar-striped progress-bar-animated ";
+          if (porcentaje < 60) barra.classList.add("bg-success");
+          else if (porcentaje < 90) barra.classList.add("bg-warning");
+          else barra.classList.add("bg-danger");
+        } else {
+          texto.innerText = "Fija una meta abajo";
+          barra.style.width = "0%";
+          barra.innerText = "0%";
+        }
+      }
+
+      function actualizarMeta() {
+        const limite = document.getElementById("nuevoLimite").value;
+        if (limite > 0) {
+          localStorage.setItem("presupuestoMensual", limite);
+          cargarGrafico();
+        }
+      }
+
+      function cerrarSesion() {
+        // 1. Antes de borrar, rescatamos la meta
+        const metaGuardada = localStorage.getItem("presupuestoMensual");
+
+        // 2. Limpiamos todo (esto borra al usuario)
+        localStorage.clear();
+
+        // 3. Volvemos a guardar la meta para que cuando otro (o tú misma) entre, ahí esté
+        if (metaGuardada) {
+          localStorage.setItem("presupuestoMensual", metaGuardada);
+        }
+
+        window.location.href = "index.html";
+      }
+      // Al cargar la página, verificamos si ya había una meta
+      document.addEventListener("DOMContentLoaded", () => {
+        const metaExistente = localStorage.getItem("presupuestoMensual");
+        if (metaExistente) {
+          document.getElementById("nuevoLimite").value = metaExistente;
+          // La barra se actualizará automáticamente cuando cargarGrafico() termine
+        }
+      });
+
+      cargarGrafico();
+    </script>
+  </body>
+</html>

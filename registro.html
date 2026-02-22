@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear Cuenta - GastoInteligente</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .card-register {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 450px;
+      }
+      .btn-primary-custom {
+        background: #4e73df;
+        border: none;
+        padding: 12px;
+        font-weight: bold;
+        border-radius: 10px;
+        transition: all 0.3s;
+      }
+      .btn-primary-custom:hover {
+        background: #224abe;
+        transform: translateY(-2px);
+      }
+      .form-control {
+        border-radius: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+      }
+      .logo-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-register text-center">
+      <div class="logo-icon">📝</div>
+      <h2 class="fw-bold mb-2">Crear Cuenta</h2>
+      <p class="text-muted mb-4">
+        Únete para empezar a ahorrar inteligentemente
+      </p>
+
+      <div class="text-start">
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Nombre Completo</label>
+          <input
+            type="text"
+            id="nombre"
+            class="form-control"
+            placeholder="Ej. Sofía Zavaleta"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Correo Electrónico</label>
+          <input
+            type="email"
+            id="email"
+            class="form-control"
+            placeholder="nombre@correo.com"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-bold">Contraseña</label>
+          <div class="input-group">
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              placeholder="Crea una contraseña"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              onclick="togglePassword()"
+              style="border-radius: 0 10px 10px 0"
+            >
+              <span id="eyeIcon">👁️</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          onclick="registrar()"
+          class="btn btn-primary btn-primary-custom w-100 mb-3"
+        >
+          Registrarme Ahora
+        </button>
+      </div>
+
+      <p id="mensaje" class="small"></p>
+
+      <hr />
+      <p class="small text-muted mb-0">
+        ¿Ya tienes cuenta?
+        <a href="login.html" class="text-primary fw-bold text-decoration-none"
+          >Inicia sesión</a
+        >
+      </p>
+    </div>
+
+    <script>
+      // Función para ver/ocultar contraseña
+      function togglePassword() {
+        const passwordInput = document.getElementById("password");
+        const eyeIcon = document.getElementById("eyeIcon");
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          eyeIcon.innerText = "🔒";
+        } else {
+          passwordInput.type = "password";
+          eyeIcon.innerText = "👁️";
+        }
+      }
+
+      async function registrar() {
+        const nombre = document.getElementById("nombre").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const mensajeDiv = document.getElementById("mensaje");
+
+        if (!nombre || !email || !password) {
+          mensajeDiv.innerText = "⚠️ Por favor, completa todos los campos.";
+          mensajeDiv.className = "small text-danger";
+          return;
+        }
+
+        const urlReplit =
+          "https://5025a3f7-5414-4235-a6d0-4e79ffff0d49-00-3bh2luvxxb3yg.worf.replit.dev/registro";
+
+        try {
+          mensajeDiv.innerText = "Procesando registro...";
+          mensajeDiv.className = "small text-primary";
+
+          const respuesta = await fetch(urlReplit, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre, email, password }),
+          });
+
+          const resultado = await respuesta.json();
+
+          if (respuesta.ok) {
+            mensajeDiv.innerText = "✅ " + resultado.feedback;
+            mensajeDiv.className = "small text-success fw-bold";
+
+            setTimeout(() => {
+              window.location.href = "login.html";
+            }, 2000);
+          } else {
+            mensajeDiv.innerText = "❌ " + resultado.feedback;
+            mensajeDiv.className = "small text-danger";
+          }
+        } catch (error) {
+          mensajeDiv.innerText = "❌ Error al conectar con el servidor.";
+          mensajeDiv.className = "small text-danger";
+        }
+      }
+    </script>
+  </body>
+</html>

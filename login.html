@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar Sesión - GastoInteligente</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .card-login {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+      }
+      .btn-primary-custom {
+        background: #4e73df;
+        border: none;
+        padding: 12px;
+        font-weight: bold;
+        border-radius: 10px;
+        transition: all 0.3s;
+      }
+      .btn-primary-custom:hover {
+        background: #224abe;
+        transform: translateY(-2px);
+      }
+      .form-control {
+        border-radius: 10px;
+        padding: 12px;
+        border: 1px solid #ddd;
+      }
+      .logo-icon {
+        font-size: 3rem;
+        color: #4e73df;
+        margin-bottom: 1rem;
+      }
+      #mensaje {
+        min-height: 24px;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-login text-center">
+      <div class="logo-icon">💰</div>
+      <h2 class="fw-bold mb-2">Bienvenido</h2>
+      <p class="text-muted mb-4">Ingresa tus credenciales para continuar</p>
+
+      <div class="text-start">
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Correo Electrónico</label>
+          <input
+            type="email"
+            id="email"
+            class="form-control"
+            placeholder="nombre@correo.com"
+          />
+        </div>
+        <div class="mb-4">
+          <label class="form-label small fw-bold">Contraseña</label>
+          <div class="input-group">
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              placeholder="••••••••"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              onclick="togglePassword()"
+            >
+              <span id="eyeIcon">👁️</span>
+            </button>
+          </div>
+        </div>
+        <button
+          onclick="entrar()"
+          class="btn btn-primary btn-primary-custom w-100 mb-3"
+        >
+          Entrar al Panel
+        </button>
+      </div>
+
+      <p id="mensaje" class="small"></p>
+
+      <hr />
+      <p class="small text-muted mb-0">
+        ¿No tienes cuenta?
+        <a
+          href="registro.html"
+          class="text-primary fw-bold text-decoration-none"
+          >Regístrate aquí</a
+        >
+      </p>
+    </div>
+
+    <script>
+      async function entrar() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const mensajeDiv = document.getElementById("mensaje");
+
+        if (!email || !password) {
+          mensajeDiv.innerText = "⚠️ Por favor, llena todos los campos.";
+          mensajeDiv.className = "small text-danger";
+          return;
+        }
+
+        const urlReplit =
+          "https://5025a3f7-5414-4235-a6d0-4e79ffff0d49-00-3bh2luvxxb3yg.worf.replit.dev/login";
+
+        try {
+          mensajeDiv.innerText = "Verificando...";
+          mensajeDiv.className = "small text-primary";
+
+          const respuesta = await fetch(urlReplit, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const resultado = await respuesta.json();
+
+          if (respuesta.ok) {
+            localStorage.setItem(
+              "usuarioLogueado",
+              JSON.stringify(resultado.usuario),
+            );
+            mensajeDiv.innerText = "✅ ¡Acceso concedido! Redirigiendo...";
+            mensajeDiv.className = "small text-success";
+
+            setTimeout(() => {
+              window.location.href = "dashboard.html";
+            }, 1500);
+          } else {
+            mensajeDiv.innerText = "❌ " + resultado.feedback;
+            mensajeDiv.className = "small text-danger";
+          }
+        } catch (error) {
+          mensajeDiv.innerText = "❌ Error de conexión con el servidor.";
+          mensajeDiv.className = "small text-danger";
+        }
+      }
+      function togglePassword() {
+        const passwordInput = document.getElementById("password");
+        const eyeIcon = document.getElementById("eyeIcon");
+
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          eyeIcon.innerText = "🔒"; // Cambia el icono a un candado o un ojo tachado
+        } else {
+          passwordInput.type = "password";
+          eyeIcon.innerText = "👁️"; // Vuelve al icono original
+        }
+      }
+    </script>
+  </body>
+</html>
