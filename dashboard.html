@@ -27,6 +27,23 @@
       .bg-primary-grad {
         background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
       }
+      @media (max-width: 850px) {
+        .display-3 {
+          font-size: 2rem; /* antes muy grande en móvil */
+        }
+
+        .card {
+          padding: 1rem !important;
+        }
+
+        #graficoContainer {
+          max-width: 200px;
+        }
+
+        .navbar-brand {
+          font-size: 1rem;
+        }
+      }
     </style>
   </head>
   <body>
@@ -270,7 +287,10 @@
                   },
                 ],
               },
-              options: { maintainAspectRatio: false },
+              options: {
+                maintainAspectRatio: false,
+                responsive: true,
+              },
             });
           }
 

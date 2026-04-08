@@ -11,7 +11,7 @@
     <style>
       body {
         background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-        height: 100vh;
+        height: auto;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -19,7 +19,8 @@
       }
       .card-register {
         background: white;
-        padding: 2.5rem;
+        padding: 2rem 1rem;
+        margin: 2rem;
         border-radius: 20px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         width: 100%;
@@ -64,7 +65,11 @@
             id="nombre"
             class="form-control"
             placeholder="Ej. Sofía Zavaleta"
+            oninput="validarNombre()"
           />
+          <div class="invalid-feedback">
+            Ingresa nombre y apellido (mínimo 2 palabras).
+          </div>
         </div>
 
         <div class="mb-3">
@@ -74,10 +79,12 @@
             id="email"
             class="form-control"
             placeholder="nombre@correo.com"
+            oninput="validarEmail()"
           />
+          <div class="invalid-feedback">Ingresa un correo válido.</div>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-3">
           <label class="form-label small fw-bold">Contraseña</label>
           <div class="input-group">
             <input
@@ -85,23 +92,56 @@
               id="password"
               class="form-control"
               placeholder="Crea una contraseña"
+              oninput="
+                validarPassword();
+                evaluarSeguridad();
+              "
             />
             <button
               class="btn btn-outline-secondary"
               type="button"
               onclick="togglePassword()"
-              style="border-radius: 0 10px 10px 0"
             >
               <span id="eyeIcon">👁️</span>
             </button>
           </div>
+
+          <!-- Barra de seguridad -->
+          <div class="progress mt-2" style="height: 6px">
+            <div
+              id="passwordStrengthBar"
+              class="progress-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+          <small id="passwordStrengthText" class="text-muted"></small>
+
+          <div class="invalid-feedback">
+            Mínimo 6 caracteres, incluye letras y números.
+          </div>
         </div>
 
+        <div class="mb-4">
+          <label class="form-label small fw-bold">Confirmar Contraseña</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            class="form-control"
+            placeholder="Repite tu contraseña"
+            oninput="validarConfirmPassword()"
+          />
+          <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+        </div>
         <button
+          id="btnRegister"
           onclick="registrar()"
-          class="btn btn-primary btn-primary-custom w-100 mb-3"
+          class="btn btn-primary btn-primary-custom w-100 mb-3 d-flex justify-content-center align-items-center gap-2"
         >
-          Registrarme Ahora
+          <span id="btnText">Registrarme Ahora</span>
+          <span
+            id="btnSpinner"
+            class="spinner-border spinner-border-sm d-none"
+          ></span>
         </button>
       </div>
 
@@ -130,22 +170,39 @@
         }
       }
 
+      let isSubmitting = false;
+
       async function registrar() {
-        const nombre = document.getElementById("nombre").value;
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        if (isSubmitting) return;
+
+        const nombreValido = validarNombre();
+        const emailValido = validarEmail();
+        const passwordValido = validarPassword();
+        const confirmValido = validarConfirmPassword(); // ✅ AQUÍ sí va
         const mensajeDiv = document.getElementById("mensaje");
 
-        if (!nombre || !email || !password) {
-          mensajeDiv.innerText = "⚠️ Por favor, completa todos los campos.";
+        if (
+          !nombreValido ||
+          !emailValido ||
+          !passwordValido ||
+          !confirmValido
+        ) {
+          mensajeDiv.innerText = "⚠️ Corrige los campos antes de continuar.";
           mensajeDiv.className = "small text-danger";
           return;
         }
+
+        const nombre = document.getElementById("nombre").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
         const urlReplit =
           "https://5025a3f7-5414-4235-a6d0-4e79ffff0d49-00-3bh2luvxxb3yg.worf.replit.dev/registro";
 
         try {
+          isSubmitting = true;
+          setLoading(true);
+
           mensajeDiv.innerText = "Procesando registro...";
           mensajeDiv.className = "small text-primary";
 
@@ -171,6 +228,123 @@
         } catch (error) {
           mensajeDiv.innerText = "❌ Error al conectar con el servidor.";
           mensajeDiv.className = "small text-danger";
+        } finally {
+          isSubmitting = false;
+          setLoading(false);
+        }
+      }
+      function validarNombre() {
+        const nombre = document.getElementById("nombre");
+        const partes = nombre.value.trim().split(" ");
+
+        if (partes.length < 2) {
+          nombre.classList.add("is-invalid");
+          nombre.classList.remove("is-valid");
+          return false;
+        } else {
+          nombre.classList.remove("is-invalid");
+          nombre.classList.add("is-valid");
+          return true;
+        }
+      }
+
+      function validarEmail() {
+        const email = document.getElementById("email");
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!regex.test(email.value)) {
+          email.classList.add("is-invalid");
+          email.classList.remove("is-valid");
+          return false;
+        } else {
+          email.classList.remove("is-invalid");
+          email.classList.add("is-valid");
+          return true;
+        }
+      }
+
+      function validarPassword() {
+        const password = document.getElementById("password");
+        const regex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+
+        if (!regex.test(password.value)) {
+          password.classList.add("is-invalid");
+          password.classList.remove("is-valid");
+          return false;
+        } else {
+          password.classList.remove("is-invalid");
+          password.classList.add("is-valid");
+          return true;
+        }
+      }
+      function setLoading(isLoading) {
+        const btn = document.getElementById("btnRegister");
+        const text = document.getElementById("btnText");
+        const spinner = document.getElementById("btnSpinner");
+
+        btn.disabled = isLoading;
+
+        if (isLoading) {
+          spinner.classList.remove("d-none");
+          text.innerText = "Registrando...";
+        } else {
+          spinner.classList.add("d-none");
+          text.innerText = "Registrarme Ahora";
+        }
+      }
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          registrar();
+        }
+      });
+      function evaluarSeguridad() {
+        const password = document.getElementById("password").value;
+        const bar = document.getElementById("passwordStrengthBar");
+        const text = document.getElementById("passwordStrengthText");
+
+        let score = 0;
+
+        if (password.length >= 6) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+
+        switch (score) {
+          case 0:
+          case 1:
+            bar.style.width = "25%";
+            bar.className = "progress-bar bg-danger";
+            text.innerText = "🔴 Débil";
+            break;
+          case 2:
+            bar.style.width = "50%";
+            bar.className = "progress-bar bg-warning";
+            text.innerText = "🟡 Media";
+            break;
+          case 3:
+            bar.style.width = "75%";
+            bar.className = "progress-bar bg-info";
+            text.innerText = "🔵 Buena";
+            break;
+          case 4:
+            bar.style.width = "100%";
+            bar.className = "progress-bar bg-success";
+            text.innerText = "🟢 Fuerte";
+            break;
+        }
+      }
+      function validarConfirmPassword() {
+        const password = document.getElementById("password").value;
+        const confirm = document.getElementById("confirmPassword");
+
+        if (confirm.value !== password || confirm.value === "") {
+          confirm.classList.add("is-invalid");
+          confirm.classList.remove("is-valid");
+          return false;
+        } else {
+          confirm.classList.remove("is-invalid");
+          confirm.classList.add("is-valid");
+          return true;
         }
       }
     </script>

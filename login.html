@@ -11,7 +11,7 @@
     <style>
       body {
         background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-        height: 100vh;
+        height: auto;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -19,7 +19,8 @@
       }
       .card-login {
         background: white;
-        padding: 2.5rem;
+        padding: 2rem 1rem;
+        margin: 2rem;
         border-radius: 20px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         width: 100%;
@@ -67,8 +68,11 @@
             id="email"
             class="form-control"
             placeholder="nombre@correo.com"
+            oninput="validarEmail()"
           />
+          <div class="invalid-feedback">Ingresa un correo válido.</div>
         </div>
+
         <div class="mb-4">
           <label class="form-label small fw-bold">Contraseña</label>
           <div class="input-group">
@@ -77,6 +81,7 @@
               id="password"
               class="form-control"
               placeholder="••••••••"
+              oninput="validarPassword()"
             />
             <button
               class="btn btn-outline-secondary"
@@ -86,12 +91,19 @@
               <span id="eyeIcon">👁️</span>
             </button>
           </div>
+          <div class="invalid-feedback">Mínimo 6 caracteres.</div>
         </div>
         <button
+          id="btnLogin"
           onclick="entrar()"
-          class="btn btn-primary btn-primary-custom w-100 mb-3"
+          class="btn btn-primary btn-primary-custom w-100 mb-3 d-flex justify-content-center align-items-center gap-2"
         >
-          Entrar al Panel
+          <span id="btnText">Entrar al Panel</span>
+          <span
+            id="btnSpinner"
+            class="spinner-border spinner-border-sm d-none"
+            role="status"
+          ></span>
         </button>
       </div>
 
@@ -109,21 +121,31 @@
     </div>
 
     <script>
+      let isSubmitting = false;
+
       async function entrar() {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        if (isSubmitting) return; // 🚫 evita múltiples clicks
+
+        const emailValido = validarEmail();
+        const passwordValido = validarPassword();
         const mensajeDiv = document.getElementById("mensaje");
 
-        if (!email || !password) {
-          mensajeDiv.innerText = "⚠️ Por favor, llena todos los campos.";
+        if (!emailValido || !passwordValido) {
+          mensajeDiv.innerText = "⚠️ Corrige los campos antes de continuar.";
           mensajeDiv.className = "small text-danger";
           return;
         }
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
         const urlReplit =
           "https://5025a3f7-5414-4235-a6d0-4e79ffff0d49-00-3bh2luvxxb3yg.worf.replit.dev/login";
 
         try {
+          isSubmitting = true;
+          setLoading(true);
+
           mensajeDiv.innerText = "Verificando...";
           mensajeDiv.className = "small text-primary";
 
@@ -140,6 +162,7 @@
               "usuarioLogueado",
               JSON.stringify(resultado.usuario),
             );
+
             mensajeDiv.innerText = "✅ ¡Acceso concedido! Redirigiendo...";
             mensajeDiv.className = "small text-success";
 
@@ -153,18 +176,66 @@
         } catch (error) {
           mensajeDiv.innerText = "❌ Error de conexión con el servidor.";
           mensajeDiv.className = "small text-danger";
+        } finally {
+          isSubmitting = false;
+          setLoading(false);
+        }
+      }
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          entrar();
+        }
+      });
+      function validarEmail() {
+        const email = document.getElementById("email");
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!regex.test(email.value)) {
+          email.classList.add("is-invalid");
+          email.classList.remove("is-valid");
+          return false;
+        } else {
+          email.classList.remove("is-invalid");
+          email.classList.add("is-valid");
+          return true;
+        }
+      }
+
+      function validarPassword() {
+        const password = document.getElementById("password");
+
+        if (password.value.length < 6) {
+          password.classList.add("is-invalid");
+          password.classList.remove("is-valid");
+          return false;
+        } else {
+          password.classList.remove("is-invalid");
+          password.classList.add("is-valid");
+          return true;
         }
       }
       function togglePassword() {
         const passwordInput = document.getElementById("password");
         const eyeIcon = document.getElementById("eyeIcon");
 
-        if (passwordInput.type === "password") {
-          passwordInput.type = "text";
-          eyeIcon.innerText = "🔒"; // Cambia el icono a un candado o un ojo tachado
+        const isHidden = passwordInput.type === "password";
+        passwordInput.type = isHidden ? "text" : "password";
+        eyeIcon.innerText = isHidden ? "🙈" : "👁️";
+      }
+
+      function setLoading(isLoading) {
+        const btn = document.getElementById("btnLogin");
+        const text = document.getElementById("btnText");
+        const spinner = document.getElementById("btnSpinner");
+
+        btn.disabled = isLoading;
+
+        if (isLoading) {
+          spinner.classList.remove("d-none");
+          text.innerText = "Ingresando...";
         } else {
-          passwordInput.type = "password";
-          eyeIcon.innerText = "👁️"; // Vuelve al icono original
+          spinner.classList.add("d-none");
+          text.innerText = "Entrar al Panel";
         }
       }
     </script>
