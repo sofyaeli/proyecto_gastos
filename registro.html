@@ -9,7 +9,7 @@
       rel="stylesheet"
     />
     <style>
-      body {
+      .container-card {
         background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
         height: auto;
         display: flex;
@@ -50,111 +50,131 @@
     </style>
   </head>
   <body>
-    <div class="card-register text-center">
-      <div class="logo-icon">📝</div>
-      <h2 class="fw-bold mb-2">Crear Cuenta</h2>
-      <p class="text-muted mb-4">
-        Únete para empezar a ahorrar inteligentemente
-      </p>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+      <div class="container">
+        <!-- LOGO -->
+        <a class="navbar-brand fw-bold" href="index.html">
+          💰 GastoInteligente
+        </a>
 
-      <div class="text-start">
-        <div class="mb-3">
-          <label class="form-label small fw-bold">Nombre Completo</label>
-          <input
-            type="text"
-            id="nombre"
-            class="form-control"
-            placeholder="Ej. Sofía Zavaleta"
-            oninput="validarNombre()"
-          />
-          <div class="invalid-feedback">
-            Ingresa nombre y apellido (mínimo 2 palabras).
+        <!-- BOTONES -->
+        <div class="d-flex gap-2">
+          <a href="login.html" class="btn btn-outline-primary btn-sm">
+            Iniciar Sesión
+          </a>
+          <a href="registro.html" class="btn btn-primary btn-sm">
+            Registrarse
+          </a>
+        </div>
+      </div>
+    </nav>
+    <section class="container-card">
+      <div class="card-register text-center">
+        <div class="logo-icon">📝</div>
+        <h2 class="fw-bold mb-2">Crear Cuenta</h2>
+        <p class="text-muted mb-4">
+          Únete para empezar a ahorrar inteligentemente
+        </p>
+
+        <div class="text-start">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Nombre Completo</label>
+            <input
+              type="text"
+              id="nombre"
+              class="form-control"
+              placeholder="Ej. Sofía Zavaleta"
+              oninput="validarNombre()"
+            />
+            <div class="invalid-feedback">
+              Ingresa nombre y apellido (mínimo 2 palabras).
+            </div>
           </div>
-        </div>
 
-        <div class="mb-3">
-          <label class="form-label small fw-bold">Correo Electrónico</label>
-          <input
-            type="email"
-            id="email"
-            class="form-control"
-            placeholder="nombre@correo.com"
-            oninput="validarEmail()"
-          />
-          <div class="invalid-feedback">Ingresa un correo válido.</div>
-        </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Correo Electrónico</label>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              placeholder="nombre@correo.com"
+              oninput="validarEmail()"
+            />
+            <div class="invalid-feedback">Ingresa un correo válido.</div>
+          </div>
 
-        <div class="mb-3">
-          <label class="form-label small fw-bold">Contraseña</label>
-          <div class="input-group">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Contraseña</label>
+            <div class="input-group">
+              <input
+                type="password"
+                id="password"
+                class="form-control"
+                placeholder="Crea una contraseña"
+                oninput="
+                  validarPassword();
+                  evaluarSeguridad();
+                "
+              />
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                onclick="togglePassword()"
+              >
+                <span id="eyeIcon">👁️</span>
+              </button>
+            </div>
+
+            <!-- Barra de seguridad -->
+            <div class="progress mt-2" style="height: 6px">
+              <div
+                id="passwordStrengthBar"
+                class="progress-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <small id="passwordStrengthText" class="text-muted"></small>
+
+            <div class="invalid-feedback">
+              Mínimo 6 caracteres, incluye letras y números.
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-bold">Confirmar Contraseña</label>
             <input
               type="password"
-              id="password"
+              id="confirmPassword"
               class="form-control"
-              placeholder="Crea una contraseña"
-              oninput="
-                validarPassword();
-                evaluarSeguridad();
-              "
+              placeholder="Repite tu contraseña"
+              oninput="validarConfirmPassword()"
             />
-            <button
-              class="btn btn-outline-secondary"
-              type="button"
-              onclick="togglePassword()"
-            >
-              <span id="eyeIcon">👁️</span>
-            </button>
+            <div class="invalid-feedback">Las contraseñas no coinciden.</div>
           </div>
-
-          <!-- Barra de seguridad -->
-          <div class="progress mt-2" style="height: 6px">
-            <div
-              id="passwordStrengthBar"
-              class="progress-bar"
-              style="width: 0%"
-            ></div>
-          </div>
-          <small id="passwordStrengthText" class="text-muted"></small>
-
-          <div class="invalid-feedback">
-            Mínimo 6 caracteres, incluye letras y números.
-          </div>
+          <button
+            id="btnRegister"
+            onclick="registrar()"
+            class="btn btn-primary btn-primary-custom w-100 mb-3 d-flex justify-content-center align-items-center gap-2"
+          >
+            <span id="btnText">Registrarme Ahora</span>
+            <span
+              id="btnSpinner"
+              class="spinner-border spinner-border-sm d-none"
+            ></span>
+          </button>
         </div>
 
-        <div class="mb-4">
-          <label class="form-label small fw-bold">Confirmar Contraseña</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            class="form-control"
-            placeholder="Repite tu contraseña"
-            oninput="validarConfirmPassword()"
-          />
-          <div class="invalid-feedback">Las contraseñas no coinciden.</div>
-        </div>
-        <button
-          id="btnRegister"
-          onclick="registrar()"
-          class="btn btn-primary btn-primary-custom w-100 mb-3 d-flex justify-content-center align-items-center gap-2"
-        >
-          <span id="btnText">Registrarme Ahora</span>
-          <span
-            id="btnSpinner"
-            class="spinner-border spinner-border-sm d-none"
-          ></span>
-        </button>
+        <p id="mensaje" class="small"></p>
+
+        <hr />
+        <p class="small text-muted mb-0">
+          ¿Ya tienes cuenta?
+          <a href="login.html" class="text-primary fw-bold text-decoration-none"
+            >Inicia sesión</a
+          >
+        </p>
       </div>
-
-      <p id="mensaje" class="small"></p>
-
-      <hr />
-      <p class="small text-muted mb-0">
-        ¿Ya tienes cuenta?
-        <a href="login.html" class="text-primary fw-bold text-decoration-none"
-          >Inicia sesión</a
-        >
-      </p>
-    </div>
+    </section>
 
     <script>
       // Función para ver/ocultar contraseña
@@ -346,6 +366,22 @@
           confirm.classList.add("is-valid");
           return true;
         }
+      }
+      const usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
+
+      const navActions = document.getElementById("navActions");
+
+      if (usuario) {
+        navActions.innerHTML = `
+    <span class="me-2">Hola, ${usuario.nombre}</span>
+    <a href="dashboard.html" class="btn btn-outline-primary btn-sm">Dashboard</a>
+    <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">Salir</button>
+  `;
+      } else {
+        navActions.innerHTML = `
+    <a href="login.html" class="btn btn-outline-primary btn-sm">Login</a>
+    <a href="registro.html" class="btn btn-primary btn-sm">Registro</a>
+  `;
       }
     </script>
   </body>
